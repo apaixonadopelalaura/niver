@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Surpresa</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top, #ffdde1 0%, #ee9ca7 40%, #2b1b33 100%);
+      color: #fff;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+      padding: 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card {
+      background: rgba(7, 5, 15, 0.6);
+      border-radius: 24px;
+      padding: 32px 24px;
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Corações decorativos fixos (nos cantos) */
+    .heart {
+      position: absolute;
+      width: 26px;
+      height: 26px;
+      background: #ff4b6e;
+      transform: rotate(45deg);
+      opacity: 0.35;
+    }
+
+    .heart::before,
+    .heart::after {
+      content: "";
+      position: absolute;
+      width: 26px;
+      height: 26px;
+      background: #ff4b6e;
+      border-radius: 50%;
+    }
+
+    .heart::before {
+      top: -13px;
+      left: 0;
+    }
+
+    .heart::after {
+      left: -13px;
+      top: 0;
+    }
+
+    .heart.h1 { top: -10px; left: 20px; }
+    .heart.h2 { bottom: -10px; right: 30px; transform: rotate(45deg) scale(0.8); }
+    .heart.h3 { top: 40%; right: -5px; transform: rotate(45deg) scale(0.6); }
+    .heart.h4 { bottom: 20%; left: -8px; transform: rotate(45deg) scale(0.7); }
+
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    h2 {
+      font-size: 1.4rem;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 0.95rem;
+      opacity: 0.9;
+      margin-bottom: 24px;
+    }
+
+    /* Área de texto romântico (fixo, sem textarea) */
+    .romantic-text-wrapper {
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 18px;
+      padding: 18px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      margin-bottom: 24px;
+    }
+
+    .romantic-text-label {
+      font-size: 0.85rem;
+      opacity: 0.85;
+      margin-bottom: 8px;
+    }
+
+    .romantic-fixed-text {
+      font-size: 0.98rem;
+      line-height: 1.7;
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 14px;
+      padding: 14px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Botões centralizados */
+    .center {
+      text-align: center;
+    }
+
+    .btn-surpresa {
+      margin-top: 10px;
+      padding: 12px 28px;
+      border-radius: 999px;
+      border: none;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: linear-gradient(135deg, #ff7eb3, #ff4b6e);
+      color: #fff;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+    }
+
+    .btn-surpresa:hover {
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+      filter: brightness(1.06);
+    }
+
+    .btn-surpresa:active {
+      transform: translateY(0) scale(0.97);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+    }
+
+    /* Botão de música */
+    #btnMusica {
+      margin-top: 6px;
+      background: linear-gradient(135deg, #ffc3d8, #ff6f91);
+      font-weight: 500;
+      padding: 8px 18px;
+      font-size: 0.85rem;
+    }
+
+    #btnMusica:hover {
+      filter: brightness(1.08);
+    }
+
+    /* Transição suave entre telas */
+    section {
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .is-hiding {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    /* Segunda tela (molduras de fotos) */
+    .photo-grid {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr)); /* 3 em cima, 3 em baixo */
+      gap: 16px;
+    }
+
+    @media (max-width: 700px) {
+      .photo-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 480px) {
+      .photo-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .frame {
+      position: relative;
+      padding-top: 115%; /* proporção do quadro */
+      border-radius: 18px;
+      background: radial-gradient(circle at top, #ffe0ec 0%, #ffb3c6 40%, #ff4b6e 100%);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+      border: 2px solid rgba(255, 255, 255, 0.7);
+      cursor: pointer;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+
+    /* Fotos dentro das molduras */
+    .frame img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 16px;
+      filter: brightness(0.98);
+      transition: transform 0.25s ease, filter 0.25s ease;
+    }
+
+    .frame:hover img {
+      transform: scale(1.05);
+      filter: brightness(1.05);
+    }
+
+    /* Legendas nas molduras (aparecem só no hover) */
+    .frame-caption {
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      padding: 4px 8px;
+      font-size: 0.75rem;
+      background: rgba(0, 0, 0, 0.55);
+      border-radius: 999px;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .frame:hover {
+      transform: translateY(-6px) scale(1.03);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6);
+      border-color: rgba(255, 255, 255, 0.95);
+    }
+
+    .frame:hover .frame-caption {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .back-text {
+      margin-top: 16px;
+      font-size: 0.85rem;
+      text-align: center;
+      opacity: 0.9;
+    }
+
+    .back-link {
+      color: #ffd9e3;
+      text-decoration: underline;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    /* Corações flutuando de leve no fundo (intensidade aumentada) */
+    .floating-hearts {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+      opacity: 0.9;
+    }
+
+    .floating-hearts span {
+      position: absolute;
+      font-size: 20px;
+      color: rgba(255, 255, 255, 0.38);
+      animation: floatUp 14s linear infinite;
+      filter: blur(0.1px);
+    }
+
+    .floating-hearts span:nth-child(1)  { left: 4%;  animation-duration: 15s; animation-delay: 0s;  }
+    .floating-hearts span:nth-child(2)  { left: 12%; animation-duration: 17s; animation-delay: 2s; }
+    .floating-hearts span:nth-child(3)  { left: 20%; animation-duration: 19s; animation-delay: 4s; }
+    .floating-hearts span:nth-child(4)  { left: 28%; animation-duration: 16s; animation-delay: 1s; }
+    .floating-hearts span:nth-child(5)  { left: 36%; animation-duration: 20s; animation-delay: 5s; }
+    .floating-hearts span:nth-child(6)  { left: 44%; animation-duration: 18s; animation-delay: 3s; }
+    .floating-hearts span:nth-child(7)  { left: 52%; animation-duration: 16s; animation-delay: 6s; }
+    .floating-hearts span:nth-child(8)  { left: 60%; animation-duration: 19s; animation-delay: 1.5s; }
+    .floating-hearts span:nth-child(9)  { left: 68%; animation-duration: 17s; animation-delay: 3.5s; }
+    .floating-hearts span:nth-child(10) { left: 76%; animation-duration: 21s; animation-delay: 5.5s; }
+    .floating-hearts span:nth-child(11) { left: 84%; animation-duration: 18s; animation-delay: 2.5s; }
+    .floating-hearts span:nth-child(12) { left: 92%; animation-duration: 20s; animation-delay: 4.5s; }
+
+    @keyframes floatUp {
+      0% {
+        transform: translateY(110vh) translateX(0);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      50% {
+        transform: translateY(40vh) translateX(-8px);
+      }
+      100% {
+        transform: translateY(-10vh) translateX(8px);
+        opacity: 0;
+      }
+    }
+
+    /* Explosão de corações ao clicar no botão Surpresa */
+    #heartExplosionContainer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+      overflow: hidden;
+    }
+
+    .heart-explosion {
+      position: absolute;
+      font-size: 18px;
+      color: #ffbfd1;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      animation: heartExplode 900ms ease-out forwards;
+    }
+
+    @keyframes heartExplode {
+      0% {
+        transform: translate(-50%, -50%) scale(0.3);
+        opacity: 1;
+      }
+      70% {
+        transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(1.4);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(1.6);
+        opacity: 0;
+      }
+    }
+
+    /* Inundação de corações (botão Te amo) */
+    #heartFloodContainer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 11;
+      overflow: hidden;
+    }
+
+    .heart-flood {
+      position: absolute;
+      font-size: 24px;
+      color: #ffbfd1;
+      text-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+      animation: heartFloodFall 3s linear forwards;
+      opacity: 0.9;
+    }
+
+    @keyframes heartFloodFall {
+      0% {
+        transform: translateY(-10vh);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(110vh);
+        opacity: 0;
+      }
+    }
+
+    /* Assinatura no rodapé */
+    .assinatura {
+      margin-top: 24px;
+      text-align: center;
+      font-size: 0.75rem;
+      opacity: 0.65;
+    }
+
+    /* Terceira tela (vídeo) */
+    .video-wrapper {
+      margin-top: 20px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+    }
+
+    .video-wrapper video {
+      width: 100%;
+      display: block;
+    }
+
+    @media (max-width: 600px) {
+      .card {
+        padding: 24px 18px;
+      }
+
+      h1 {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Corações flutuando no fundo -->
+  <div class="floating-hearts">
+    <span>❤</span>
+    <span>❤</span>
+    <span>❤</span>
+    <span>❤</span>
+    <span>❤</span>
+    <span>❤</span>
+    <span>❤</span>
+    <span>❤</span>
+    <span>❤</span>
+    <span>❤</span>
+    <span>❤</span>
+    <span>❤</span>
+  </div>
+
+  <!-- Container para explosão de corações -->
+  <div id="heartExplosionContainer"></div>
+  <!-- Container para inundação de corações -->
+  <div id="heartFloodContainer"></div>
+
+  <div class="container">
+    <div class="card">
+      <!-- Corações decorativos fixos -->
+      <div class="heart h1"></div>
+      <div class="heart h2"></div>
+      <div class="heart h3"></div>
+      <div class="heart h4"></div>
+
+      <!-- PRIMEIRA TELA: texto romântico + botão -->
+      <section id="primeira-tela">
+        <h1>feliz aniversário Princesa💖</h1>
+        <p class="subtitle">
+          Um lugar especial só nosso, para guardar em palavras tudo que eu sinto por você. 💕
+        </p>
+
+        <div class="romantic-text-wrapper">
+          <p class="romantic-text-label">Te amo neném</p>
+          <p class="romantic-fixed-text">
+            Oii, minha princesa, hoje é o seu dia!!! O dia mais lindo do ano, o dia em que nasceu a garotinha mais linda do universo. E eu quero celebrar esse dia te mostrando quao você é importante pra mim. Hoje eu quero que saiba que o meu amor por você é maior que o universo inteiro. Quero muito te fazer feliz hoje e sempre, e esse textinho aqui não é nem um terço de tudo que ainda tenho pra te dizer.
+            <br><br>
+            A música que vai tocar assim que você apertar em surpresa é uma música que me faz pensar em você mais que nunca, é uma música que eu me vejo cantando para você. Talvez o significado dela seja um pouco parecido com nossa situação de agora: "Quando Bate Aquela Saudade", de Rubel, é uma crônica sobre a intensidade da ausência e o desejo de reconciliação... A "saudade apertada" expressa o desejo físico e emocional de compartilhar o cotidiano e compensar o tempo perdido com beijos e carinho.
+          </p>
+        </div>
+
+        <div class="center">
+          <button class="btn-surpresa" id="btnSurpresa">
+            Surpresa!
+          </button>
+        </div>
+
+        <!-- Controle de música -->
+        <div class="center" style="margin-top:14px;">
+          <button class="btn-surpresa" id="btnMusica">
+            ▶ Nossa música
+          </button>
+          <p style="margin-top:6px; font-size:0.7rem; opacity:0.75;">
+            Quando Bate Aquela Saudade — Rubel 🎶
+          </p>
+        </div>
+
+        <audio id="audioRomantico" loop>
+          <source src="quando-bate-aquela-saudade.mp3" type="audio/mpeg">
+        </audio>
+      </section>
+
+      <!-- SEGUNDA TELA: 6 molduras para fotos (3 em cima, 3 em baixo) -->
+      <section id="segunda-tela" class="hidden is-hiding">
+        <h2>As artes mais lindas</h2>
+        <p class="subtitle">
+          Cada foto, um sorriso, cada sorriso, um motivo a mais para te amar. 📸❤️
+        </p>
+
+        <div class="photo-grid">
+          <div class="frame">
+            <img src="linda.jpg" alt="Foto 1">
+            <div class="frame-caption">Te amar é minha maior felicidade</div>
+          </div>
+          <div class="frame">
+            <img src="minha pequena.jpg" alt="Foto 2">
+            <div class="frame-caption">Minha garotinha</div>
+          </div>
+          <div class="frame">
+            <img src="fofuxinha.jpg" alt="Foto 3">
+            <div class="frame-caption">Seu sorriso me encanta</div>
+          </div>
+          <div class="frame">
+            <img src="minhas princesas.jpg" alt="Foto 4">
+            <div class="frame-caption">Minhas duas princesas juntas</div>
+          </div>
+          <div class="frame">
+            <img src="perfeita.jpg" alt="Foto 5">
+            <div class="frame-caption">Cada foto sua me traz paz</div>
+          </div>
+          <div class="frame">
+            <img src="te amo pra sempre.jpg" alt="Foto 6">
+            <div class="frame-caption">Para sempre eu te amarei</div>
+          </div>
+        </div>
+
+        <p class="back-text">
+          Quer voltar para o texto?
+          <span class="back-link" id="voltarTexto">Clique aqui</span>.
+        </p>
+
+        <div class="center" style="margin-top:18px;">
+          <button class="btn-surpresa" id="btnTeAmo">
+            Te amo
+          </button>
+        </div>
+      </section>
+
+      <!-- TERCEIRA TELA: vídeo -->
+      <section id="terceira-tela" class="hidden is-hiding">
+        <h2>Um último presente pra você</h2>
+        <p class="subtitle">
+          Esse vídeo é só mais uma forma de te lembrar o quanto você é especial pra mim. 💞
+        </p>
+
+        <div class="video-wrapper">
+          <!-- TROQUE "video.mp4" PELO NOME DO SEU ARQUIVO DE VÍDEO -->
+          <video controls>
+            <source src="video para minha princesa.mp4" type="video/mp4">
+            Seu navegador não suporta vídeo em HTML5.
+          </video>
+        </div>
+      </section>
+
+      <!-- Assinatura no rodapé -->
+      <p class="assinatura">
+        Feito com todo o meu amor, só pra você, te amo minha neneca. 💘
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const btnSurpresa = document.getElementById("btnSurpresa");
+    const primeiraTela = document.getElementById("primeira-tela");
+    const segundaTela = document.getElementById("segunda-tela");
+    const terceiraTela = document.getElementById("terceira-tela");
+    const voltarTexto = document.getElementById("voltarTexto");
+    const heartExplosionContainer = document.getElementById("heartExplosionContainer");
+    const heartFloodContainer = document.getElementById("heartFloodContainer");
+
+    const btnMusica = document.getElementById("btnMusica");
+    const audioRomantico = document.getElementById("audioRomantico");
+    const btnTeAmo = document.getElementById("btnTeAmo");
+
+    // volume inicial mais baixo (10%)
+    audioRomantico.volume = 0.1;
+
+    function criarExplosaoDeCoracoes(x, y) {
+      const quantidade = 18;
+
+      for (let i = 0; i < quantidade; i++) {
+        const heart = document.createElement("div");
+        heart.className = "heart-explosion";
+        heart.textContent = "❤";
+
+        heart.style.left = x + "px";
+        heart.style.top = y + "px";
+
+        const angulo = Math.random() * 2 * Math.PI;
+        const distancia = 80 + Math.random() * 80;
+        const dx = Math.cos(angulo) * distancia;
+        const dy = Math.sin(angulo) * distancia;
+
+        heart.style.setProperty("--x", dx + "px");
+        heart.style.setProperty("--y", dy + "px");
+        heart.style.animationDelay = (Math.random() * 0.18).toFixed(2) + "s";
+
+        heartExplosionContainer.appendChild(heart);
+
+        setTimeout(() => {
+          heart.remove();
+        }, 1200);
+      }
+    }
+
+    function criarInundacaoDeCoracoes() {
+      const quantidade = 80;
+
+      heartFloodContainer.innerHTML = "";
+
+      for (let i = 0; i < quantidade; i++) {
+        const heart = document.createElement("div");
+        heart.className = "heart-flood";
+        heart.textContent = "❤";
+
+        const left = Math.random() * 100; // 0 a 100vw
+        const delay = Math.random() * 1.5; // até 1.5s
+
+        heart.style.left = left + "vw";
+        heart.style.top = "-10vh";
+        heart.style.animationDelay = delay.toFixed(2) + "s";
+
+        heartFloodContainer.appendChild(heart);
+      }
+
+      // limpar depois de um tempo
+      setTimeout(() => {
+        heartFloodContainer.innerHTML = "";
+      }, 3500);
+    }
+
+    function transicaoEntreTelas(saindo, entrando) {
+      saindo.classList.add("is-hiding");
+
+      setTimeout(() => {
+        saindo.classList.add("hidden");
+        saindo.classList.remove("is-hiding");
+
+        entrando.classList.remove("hidden");
+        entrando.classList.add("is-hiding");
+
+        void entrando.offsetWidth;
+
+        entrando.classList.remove("is-hiding");
+
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }, 350);
+    }
+
+    function tocarMusica() {
+      audioRomantico.play().then(() => {
+        btnMusica.textContent = "⏸ Pausar música";
+      }).catch(() => {
+        // se o navegador bloquear, só ignora
+      });
+    }
+
+    btnSurpresa.addEventListener("click", () => {
+      const rect = btnSurpresa.getBoundingClientRect();
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+
+      criarExplosaoDeCoracoes(x, y);
+
+      setTimeout(() => {
+        tocarMusica();
+        transicaoEntreTelas(primeiraTela, segundaTela);
+      }, 300);
+    });
+
+    voltarTexto.addEventListener("click", () => {
+      transicaoEntreTelas(segundaTela, primeiraTela);
+    });
+
+    btnMusica.addEventListener("click", () => {
+      if (audioRomantico.paused) {
+        tocarMusica();
+      } else {
+        audioRomantico.pause();
+        btnMusica.textContent = "▶ Nossa música";
+      }
+    });
+
+    // Botão "Te amo" -> inundação de corações + vai para a tela do vídeo
+    btnTeAmo.addEventListener("click", () => {
+      criarInundacaoDeCoracoes();
+
+      setTimeout(() => {
+        transicaoEntreTelas(segundaTela, terceiraTela);
+      }, 1800); // espera um pouco pra inundação acontecer antes da troca
+    });
+  </script>
+</body>
+</html>
